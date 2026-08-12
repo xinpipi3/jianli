@@ -41,13 +41,15 @@ body{font-family:"Inter","PingFang SC","Microsoft YaHei",sans-serif;background:#
 #sceneEnterBtn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.6);color:#fff;}
 #sceneHint{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);z-index:10;color:rgba(255,255,255,0.25);font-size:0.65vw;letter-spacing:0.1em;opacity:0;transition:opacity 1s;}
 #sceneHint.visible{opacity:1;}
-.loading-overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#000;transition:opacity 1s ease;}
+.loading-overlay{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;transition:opacity 1s ease;}
+.loading-progress{color:rgba(255,255,255,0.7);font-family:monospace;font-size:14px;margin-top:12px;display:none;}
 .loading-overlay.hidden{opacity:0;pointer-events:none;}
 .loading-overlay .dots{display:flex;gap:0.4vw;}
 .loading-overlay .dots span{width:0.4vw;height:0.4vw;background:rgba(255,255,255,0.5);border-radius:50%;animation:dotPulse 1.4s ease-in-out infinite;}
 .loading-overlay .dots span:nth-child(2){animation-delay:0.2s}
 .loading-overlay .dots span:nth-child(3){animation-delay:0.4s}
 @keyframes dotPulse{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+@keyframes rotatePulse{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
 
 /* Animation progress bar */
 #animBar{position:absolute;bottom:3%;left:10%;width:80%;height:6px;z-index:20;background:rgba(255,255,255,0.12);border-radius:3px;cursor:pointer;display:none;}
@@ -57,7 +59,7 @@ body{font-family:"Inter","PingFang SC","Microsoft YaHei",sans-serif;background:#
 
 #mainContent{position:relative;opacity:0;transition:opacity 1s ease 0.2s;background:url('assets/images/page-bg.jpg') center top/100% auto no-repeat;}
 #mainContent.show{opacity:1}
-body.show-content{overflow-x:hidden;overflow-y:auto}
+body.show-content{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #mainContent .bg-spacer{padding-top:223.39%}
 #mainContent .content-layer{position:absolute;inset:0;z-index:2;}
 #mainContent .works-grid{position:absolute;inset:0;z-index:0;}
@@ -76,6 +78,7 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
 .work-card .overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity var(--trans);border-radius:0.3vw;}
 .work-card:hover .overlay{opacity:1}
 .work-card .overlay span{color:#fff;font-size:0.62vw;letter-spacing:0.04em;border:1px solid rgba(255,255,255,0.3);padding:0.39vw 1.09vw;border-radius:100px;backdrop-filter:blur(10px)}
+.work-card[data-category="video"][style*="display:none"]{display:none!important;}
 .carousel-section{position:absolute;left:25.52%;top:20.93%;width:49.00%;height:9.60%;z-index:3;}
 .carousel-wrapper{position:relative;overflow:hidden;width:100%;height:100%;border-radius:0.5vw;border:0.04vw solid var(--border);}
 .carousel-track{display:flex;height:100%;transition:transform 0.7s cubic-bezier(0.16,1,0.3,1);}
@@ -101,7 +104,38 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
 .page-footer .links a{color:var(--text-muted);text-decoration:none;font-size:0.66vw;transition:color 0.3s;letter-spacing:0.04em;}
 .page-footer .links a:hover{color:#e5e5e5;}
 .page-footer .copy{font-size:0.58vw;color:var(--text-muted);letter-spacing:0.04em;}
-@media(max-width:768px){.carousel-controls button{min-width:14px;min-height:14px;}}
+@media(max-width:768px){
+  body.show-content{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .loading-overlay .dots span{width:6px;height:6px}
+  .loading-progress{font-size:16px}
+}
+
+/* ── Mobile portrait → force landscape via CSS ── */
+@media(orientation: portrait){
+  #scene3d{position:fixed!important;transform:rotate(90deg)!important;transform-origin:center center!important;
+    width:100vh!important;height:100vw!important;
+    left:calc((100vw - 100vh)/2)!important;top:calc((100vh - 100vw)/2)!important;}
+  #scene3d canvas{transform:rotate(-90deg)!important;transform-origin:center center!important;}
+  #rotateHint{display:none!important;}
+  #sceneEnterBtn,#sceneHint{z-index:20!important;}
+
+  /* Main content also forced landscape */
+  #mainContent{position:fixed!important;transform:rotate(90deg)!important;transform-origin:center center!important;
+    width:100vh!important;height:100vw!important;
+    left:calc((100vw - 100vh)/2)!important;top:calc((100vh - 100vw)/2)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;}
+  body.show-content{overflow:hidden!important;}
+
+  /* Modal also rotated */
+  .modal{transform:rotate(90deg)!important;transform-origin:center center!important;
+    width:100vh!important;height:100vw!important;
+    left:calc((100vw - 100vh)/2)!important;top:calc((100vh - 100vw)/2)!important;}
+  .modal .modal-content{max-width:85vh!important;max-height:85vw!important;
+    transform:rotate(-90deg)!important;transform-origin:center center!important;}
+  .modal-content img,.modal-content video{max-width:85vh!important;max-height:85vw!important;}
+}
+
 
 /* ── Debug control panel ── */
 
@@ -119,12 +153,17 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
 #debugPanel .row input{flex:1;}
 #debugPanel .row span{min-width:28px;text-align:right;color:#4af;}
 #debugPanel h4{margin:0 0 4px;color:#4af;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:4px;}
+
+/* ── Mobile eye floater ── */
+#eyeFloater{position:fixed;z-index:30;pointer-events:none;font-size:7vw;line-height:1;display:none;transform:translate(-50%,-50%);filter:drop-shadow(0 0 6px rgba(255,255,255,0.4));transition:opacity 0.2s;}
+#eyeFloater.show{opacity:0.85;}
+#eyeFloater.hide{opacity:0;}
 </style>
 </head>
 <body>
 <div id="splash">
 <div class="splash-frame">
-<video id="splashVideo" muted loop playsinline preload="auto"><source src="assets/video/splash-bg.mp4" type="video/mp4"></video>
+<video id="splashVideo" muted loop playsinline preload="none"></video>
 <div class="text-layer">
 <img class="text-img title-combined-img" id="titleCombinedImg" src="assets/images/title-combined.png" alt="">
 <button class="enter-btn" id="enterBtn"><img src="assets/images/btn-arrow.png" alt="Enter"></button>
@@ -133,9 +172,13 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
 </div>
 
 <div id="scene3d">
-<div class="loading-overlay" id="loadingOverlay"><div class="dots"><span></span><span></span><span></span></div></div>
+<div class="loading-overlay" id="loadingOverlay"><div class="dots"><span></span><span></span><span></span></div><div class="loading-progress" id="loadProgress">0%</div></div>
 <button id="sceneEnterBtn">进入作品</button>
 <p id="sceneHint">拖拽鼠标旋转视角</p>
+<div id="rotateHint" style="position:absolute;inset:0;z-index:999;background:#000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:sans-serif;">
+  <div style="font-size:60px;animation:rotatePulse 1.5s ease-in-out infinite;">📱</div>
+  <div style="color:rgba(255,255,255,0.9);font-size:18px;text-align:center;">请将手机横屏使用<br><span style="color:rgba(255,255,255,0.4);font-size:14px;">横屏观看效果更佳</span></div>
+</div>
 <div id="animBar" style="display:none"><div class="fill"></div><div class="thumb" style="left:0%"></div><div class="timeLabel" style="left:0%">0:00</div></div>
 <img class="edge-overlay left"  id="edgeLeft" src="assets/images/edge-left.png" alt="">
 <img class="edge-overlay right" id="edgeRight" src="assets/images/edge-right.png" alt="">
@@ -154,6 +197,7 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
   <label>Outline width <span class="val" id="outlineV">0.5</span></label><input type="range" id="outline" min="0" max="3" step="0.1" value="0.5">
   <label>Outline opacity <span class="val" id="outlineOpV">1</span></label><input type="range" id="outlineOp" min="0" max="1" step="0.05" value="1">
 </div>
+<div id="eyeFloater" class="show">👁</div>
 </div>
 
 <div id="mainContent">
@@ -167,46 +211,47 @@ body.show-content{overflow-x:hidden;overflow-y:auto}
 <button class="filter-btn" data-filter="engine">引擎美术</button>
 <button class="filter-btn" data-filter="video">视频演示</button>
 </div>
+<button id="backTo3dBtn" style="position:absolute;top:1vw;right:1vw;z-index:5;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:0.4vw 1.2vw;border-radius:4px;cursor:pointer;font-size:0.85vw;font-family:inherit;letter-spacing:0.04em;">首页</button>
 <div class="works-grid" id="worksGrid">
-<div class="work-card" data-category="3d" data-src="assets/images/work-01.jpg" style="left:26.18%;top:31.81%;width:16.76%;height:4.08%;"><img src="assets/images/work-01.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-02.jpg" style="left:43.17%;top:31.83%;width:30.80%;height:5.35%;"><img src="assets/images/work-02.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-03.jpg" style="left:26.18%;top:35.98%;width:16.76%;height:3.79%;"><img src="assets/images/work-03.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-04.jpg" style="left:43.17%;top:37.30%;width:30.84%;height:7.17%;"><img src="assets/images/work-04.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-05.jpg" style="left:26.18%;top:39.87%;width:16.76%;height:11.65%;"><img src="assets/images/work-05.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-06.jpg" style="left:43.17%;top:44.59%;width:30.80%;height:6.93%;"><img src="assets/images/work-06.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-07.jpg" style="left:26.18%;top:51.66%;width:47.94%;height:8.40%;"><img src="assets/images/work-07.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-08.jpg" style="left:26.18%;top:60.18%;width:16.37%;height:4.13%;"><img src="assets/images/work-08.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-09.jpg" style="left:26.18%;top:64.40%;width:16.37%;height:4.12%;"><img src="assets/images/work-09.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-10.jpg" style="left:42.71%;top:60.18%;width:14.78%;height:4.15%;"><img src="assets/images/work-10.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-11.jpg" style="left:42.78%;top:64.40%;width:14.62%;height:4.10%;"><img src="assets/images/work-11.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-12.jpg" style="left:57.68%;top:60.18%;width:16.48%;height:4.13%;"><img src="assets/images/work-12.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="3d" data-src="assets/images/work-13.jpg" style="left:57.72%;top:64.40%;width:16.41%;height:4.12%;"><img src="assets/images/work-13.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-14.jpg" style="left:26.14%;top:68.64%;width:23.82%;height:5.35%;"><img src="assets/images/work-14.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-15.jpg" style="left:50.23%;top:68.64%;width:23.86%;height:5.33%;"><img src="assets/images/work-15.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-16.jpg" style="left:26.14%;top:74.13%;width:23.82%;height:5.35%;"><img src="assets/images/work-16.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-17.jpg" style="left:50.23%;top:74.13%;width:23.89%;height:5.33%;"><img src="assets/images/work-17.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-18.jpg" style="left:26.10%;top:79.58%;width:11.87%;height:3.06%;"><img src="assets/images/work-18.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-19.jpg" style="left:38.13%;top:79.58%;width:11.87%;height:3.06%;"><img src="assets/images/work-19.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-20.jpg" style="left:50.23%;top:79.58%;width:11.87%;height:3.06%;"><img src="assets/images/work-20.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-21.jpg" style="left:62.26%;top:79.58%;width:11.87%;height:3.06%;"><img src="assets/images/work-21.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-22.jpg" style="left:26.07%;top:82.74%;width:16.14%;height:7.07%;"><img src="assets/images/work-22.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-23.jpg" style="left:42.43%;top:82.74%;width:16.21%;height:7.07%;"><img src="assets/images/work-23.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-24.jpg" style="left:58.92%;top:82.72%;width:15.21%;height:7.08%;"><img src="assets/images/work-24.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-25.jpg" style="left:26.11%;top:89.91%;width:27.39%;height:5.78%;"><img src="assets/images/work-25.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="engine" data-src="assets/images/work-26.jpg" style="left:53.76%;top:89.91%;width:20.40%;height:5.77%;"><img src="assets/images/work-26.jpg" alt=""><div class="overlay"><span>查看详情</span></div></div>
-<div class="work-card" data-category="video" data-src="assets/video/demo-01.mp4" style="left:26.03%;top:31.81%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-01.mp4" type="video/mp4"></video><div class="overlay"><span>大众车桌面演示</span></div></div>
-<div class="work-card" data-category="video" data-src="assets/video/demo-02.mp4" style="left:50.16%;top:31.81%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-02.mp4" type="video/mp4"></video><div class="overlay"><span>IP形象效果展示</span></div></div>
-<div class="work-card" data-category="video" data-src="assets/video/demo-03.mp4" style="left:26.03%;top:37.30%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-03.mp4" type="video/mp4"></video><div class="overlay"><span>IP形象动画演示</span></div></div>
-<!-- demo-04 removed: file exceeds 100MB GitEE limit -->
-<div class="work-card" data-category="video" data-src="assets/video/demo-05.mp4" style="left:26.03%;top:42.78%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-05.mp4" type="video/mp4"></video><div class="overlay"><span>驾驶模式展示</span></div></div>
-<div class="work-card" data-category="video" data-src="assets/video/demo-06.mp4" style="left:50.16%;top:42.78%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-06.mp4" type="video/mp4"></video><div class="overlay"><span>拉花效果演示</span></div></div>
-<div class="work-card" data-category="video" data-src="assets/video/demo-07.mp4" style="left:38.09%;top:48.27%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><video muted loop autoplay playsinline preload="auto"><source src="assets/video/demo-07.mp4" type="video/mp4"></video><div class="overlay"><span>表情骨骼绑定演示</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-01.jpg" style="left:26.18%;top:31.81%;width:16.76%;height:4.08%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-02.jpg" style="left:43.17%;top:31.83%;width:30.80%;height:5.35%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-03.jpg" style="left:26.18%;top:35.98%;width:16.76%;height:3.79%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-04.jpg" style="left:43.17%;top:37.30%;width:30.84%;height:7.17%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-05.jpg" style="left:26.18%;top:39.87%;width:16.76%;height:11.65%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-06.jpg" style="left:43.17%;top:44.59%;width:30.80%;height:6.93%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-07.jpg" style="left:26.18%;top:51.66%;width:47.94%;height:8.40%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-08.jpg" style="left:26.18%;top:60.18%;width:16.37%;height:4.13%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-09.jpg" style="left:26.18%;top:64.40%;width:16.37%;height:4.12%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-10.jpg" style="left:42.71%;top:60.18%;width:14.78%;height:4.15%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-11.jpg" style="left:42.78%;top:64.40%;width:14.62%;height:4.10%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-12.jpg" style="left:57.68%;top:60.18%;width:16.48%;height:4.13%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="3d" data-src="assets/images/work-13.jpg" style="left:57.72%;top:64.40%;width:16.41%;height:4.12%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-14.jpg" style="left:26.14%;top:68.64%;width:23.82%;height:5.35%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-15.jpg" style="left:50.23%;top:68.64%;width:23.86%;height:5.33%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-16.jpg" style="left:26.14%;top:74.13%;width:23.82%;height:5.35%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-17.jpg" style="left:50.23%;top:74.13%;width:23.89%;height:5.33%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-18.jpg" style="left:26.10%;top:79.58%;width:11.87%;height:3.06%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-19.jpg" style="left:38.13%;top:79.58%;width:11.87%;height:3.06%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-20.jpg" style="left:50.23%;top:79.58%;width:11.87%;height:3.06%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-21.jpg" style="left:62.26%;top:79.58%;width:11.87%;height:3.06%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-22.jpg" style="left:26.07%;top:82.74%;width:16.14%;height:7.07%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-23.jpg" style="left:42.43%;top:82.74%;width:16.21%;height:7.07%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-24.jpg" style="left:58.92%;top:82.72%;width:15.21%;height:7.08%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-25.jpg" style="left:26.11%;top:89.91%;width:27.39%;height:5.78%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="engine" data-src="assets/images/work-26.jpg" style="left:53.76%;top:89.91%;width:20.40%;height:5.77%;"><div class="overlay"><span>查看详情</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-01.mp4" style="left:26.03%;top:31.81%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>大众车桌面演示</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-02.mp4" style="left:50.16%;top:31.81%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>IP形象效果展示</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-03.mp4" style="left:26.03%;top:37.30%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>IP形象动画演示</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-04.mp4" style="left:50.16%;top:37.30%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>虚拟仿真游艇酒吧</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-05.mp4" style="left:26.03%;top:42.78%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>驾驶模式展示</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-06.mp4" style="left:50.16%;top:42.78%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>拉花效果演示</span></div></div>
+<div class="work-card" data-category="video" data-src="assets/video/demo-07.mp4" style="left:38.09%;top:48.27%;width:23.82%;height:5.35%;border:0.04vw solid rgba(255,255,255,0.3);display:none"><div class="overlay"><span>表情骨骼绑定演示</span></div></div>
 <section class="carousel-section">
 <div class="carousel-wrapper" id="featuredCarousel">
 <div class="carousel-track" id="carouselTrack">
-<div class="carousel-item"><img src="assets/images/carousel-01.jpg" alt=""><div class="slide-info"><h3>精选作品一</h3></div></div>
-<div class="carousel-item"><img src="assets/images/carousel-02.jpg" alt=""><div class="slide-info"><h3>精选作品二</h3></div></div>
-<div class="carousel-item"><img src="assets/images/carousel-03.jpg" alt=""><div class="slide-info"><h3>精选作品三</h3></div></div>
+<div class="carousel-item" data-src="assets/images/carousel-01.jpg"><div class="slide-info"><h3>精选作品一</h3></div></div>
+<div class="carousel-item" data-src="assets/images/carousel-02.jpg"><div class="slide-info"><h3>精选作品二</h3></div></div>
+<div class="carousel-item" data-src="assets/images/carousel-03.jpg"><div class="slide-info"><h3>精选作品三</h3></div></div>
 </div>
 <div class="carousel-dots" id="carouselDots"></div>
 <div class="carousel-controls"><button id="carouselPrev">◀</button><button id="carouselNext">▶</button></div>
@@ -242,6 +287,26 @@ canvas.height = Math.floor(window.innerHeight * dpr);
 scene3d.appendChild(canvas);
 document.getElementById('resV').textContent = canvas.width + '×' + canvas.height + ' @' + dpr.toFixed(1) + 'x';
 
+// ── Portrait → auto-rotate to landscape (mobile) ──
+function checkOrientation(){
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var isMobile = w < 1024;
+  var isPortrait = w < h;
+  if(isMobile && isPortrait){
+    // CSS rotates scene3d 90°, so canvas fills h×w
+    canvas.width  = Math.floor(h * dpr);
+    canvas.height = Math.floor(w * dpr);
+  } else {
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+  }
+  if(engine) engine.resize();
+}
+checkOrientation();
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', function(){ setTimeout(checkOrientation, 200); });
+
 // ── Engine ──
 var engine = new BABYLON.Engine(canvas, true, {stencil:true, adaptToDeviceRatio:true});
 var scene  = new BABYLON.Scene(engine);
@@ -272,14 +337,23 @@ shadowGen.blurKernel = 64;
 // ── Load FBX ──
 var fbxLoaded = false;
 var fbxLoadTime = 0;
+// ── FBX loading progress (simulated, based on elapsed time) ──
+var loadProg = document.getElementById('loadProgress');
+if(loadProg) loadProg.style.display = 'block';
+var _loadStart = performance.now();
+var _loadTimer = setInterval(function(){
+  if(fbxLoaded){ loadProg.textContent = '100%'; clearInterval(_loadTimer); return; }
+  var elapsed = (performance.now() - _loadStart) / 1000;
+  var pct = Math.min(95, Math.round(elapsed / 15 * 100));
+  loadProg.textContent = pct + '%';
+}, 200);
+
 BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), scene, function(meshes, particleSystems, skeletons, groups){
   fbxLoaded = true;
   fbxLoadTime = performance.now() / 1000;
-  // Minimum 2s black screen total → hide overlay, play greeting
   var fadeDelay = Math.max(0, 2 - fbxLoadTime);
   setTimeout(function(){
     loadingOverlay.classList.add('hidden');
-    // Play greeting once overlay starts fading
     if(!window._animStarted){
       window._animStarted = true;
       doSwitch('greeting');
@@ -497,6 +571,62 @@ BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), 
       eyeR.rotationQuaternion = baseQR.multiply(mouseQ);
     });
     console.log('[3D] eye tracking ACTIVE');
+
+    // ── Mobile eye floater: touch-drag anywhere to move eyes ──
+    var eyeFloater = document.getElementById('eyeFloater');
+    var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    if(isTouch && eyeFloater){
+      eyeFloater.style.display = 'block';
+      var eActive = false, eStartX = 0, eStartY = 0;
+
+      function updateEye(fx, fy){
+        // Map finger screen position to _eyeMX/_eyeMY (-1..1), clamped
+        var rr = canvas.getBoundingClientRect();
+        var mx = ((fx - rr.left) / rr.width)  * 2 - 1;
+        var my = ((fy - rr.top)  / rr.height) * 2 - 1;
+        window._eyeMX = Math.max(-1, Math.min(1, mx));
+        window._eyeMY = Math.max(-1, Math.min(1, my));
+        window._eyeOutTime = 0;
+        // Move floater icon to finger position
+        eyeFloater.style.left = fx + 'px';
+        eyeFloater.style.top  = fy + 'px';
+      }
+
+      canvas.addEventListener('touchstart', function(e){
+        if(e.touches.length !== 1) return;  // only single finger
+        e.preventDefault();
+        eActive = true;
+        eyeFloater.classList.remove('hide');
+        eyeFloater.classList.add('show');
+        updateEye(e.touches[0].clientX, e.touches[0].clientY);
+      }, {passive: false});
+
+      canvas.addEventListener('touchmove', function(e){
+        if(!eActive) return;
+        e.preventDefault();
+        updateEye(e.touches[0].clientX, e.touches[0].clientY);
+      }, {passive: false});
+
+      canvas.addEventListener('touchend', function(e){
+        eActive = false;
+        eyeFloater.classList.remove('show');
+        eyeFloater.classList.add('hide');
+        if(!window._eyeReturning){
+          window._eyeOutTime = performance.now() / 1000;
+          window._eyeSavedMX = window._eyeMX || 0;
+          window._eyeSavedMY = window._eyeMY || 0;
+        }
+      });
+
+      canvas.addEventListener('touchcancel', function(e){
+        eActive = false;
+        eyeFloater.classList.remove('show');
+        eyeFloater.classList.add('hide');
+      });
+
+      console.log('[3D] mobile eye floater ACTIVE');
+    }
   }
 
   // ── Camera: shexiangji world position → beijing pivot (correct alpha/beta) ──
@@ -660,7 +790,7 @@ BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), 
 
     if(edgeL && edgeMaxL){
       var hiddenL = -edgeMaxL;
-      var shownL  = canvas.width * 0.40 - edgeMaxL;
+      var shownL  = 0;  // left edge touches page left edge when fully shown
       if(delta < -edgeDead){
         edgeL.style.transform = 'translateX(' + (hiddenL + (shownL - hiddenL) * slideFactor) + 'px)';
       } else {
@@ -669,7 +799,7 @@ BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), 
     }
     if(edgeR && edgeMaxR){
       var hiddenR = edgeMaxR;
-      var shownR  = edgeMaxR - canvas.width * 0.313;
+      var shownR  = 0;  // right edge touches page right edge when fully shown
       if(delta > edgeDead){
         edgeR.style.transform = 'translateX(' + (hiddenR + (shownR - hiddenR) * slideFactor) + 'px)';
       } else {
@@ -954,13 +1084,45 @@ window.addEventListener('resize', function(){
   document.getElementById('resV').textContent = canvas.width + '×' + canvas.height + ' @' + dpr2.toFixed(1) + 'x';
 });
 
-// ── Enter works page ──
+// ── Enter works page (lazy-load images on click) ──
+var _worksImgsLoaded = false;
+function loadWorksImages(){
+  if(_worksImgsLoaded) return;
+  _worksImgsLoaded = true;
+  var cards = document.querySelectorAll('.work-card[data-src$=".jpg"]');
+  cards.forEach(function(card){
+    var src = card.dataset.src;
+    if(!src||!src.endsWith('.jpg')) return;
+    var img = document.createElement('img');
+    img.src = src; img.alt = '';
+    card.insertBefore(img, card.firstChild);
+  });
+  // Also load carousel images
+  var carItems = document.querySelectorAll('.carousel-item[data-src$=".jpg"]');
+  carItems.forEach(function(item){
+    var src = item.dataset.src;
+    if(!src) return;
+    var img = document.createElement('img');
+    img.src = src; img.alt = '';
+    item.insertBefore(img, item.firstChild);
+  });
+}
 sceneEnterBtn.addEventListener('click', function(){
   scene3d.style.opacity = '0';
   scene3d.style.pointerEvents = 'none';
   mainContent.classList.add('show');
   document.body.classList.add('show-content');
   setTimeout(initMain, 400);
+  // Start loading works images 500ms after transition
+  setTimeout(loadWorksImages, 900);
+});
+
+// ── Back to 3D scene ──
+document.getElementById('backTo3dBtn').addEventListener('click', function(){
+  mainContent.classList.remove('show');
+  document.body.classList.remove('show-content');
+  scene3d.style.opacity = '1';
+  scene3d.style.pointerEvents = 'auto';
 });
 })();
 </script>
@@ -972,6 +1134,33 @@ const splash=document.getElementById('splash'),video=document.getElementById('sp
 splash.style.display = 'none';
 })();
 function initMain(){var glow=document.getElementById('cursorGlow');if(glow){document.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';glow.style.opacity='1';});document.addEventListener('mouseleave',function(){glow.style.opacity='0';});}var fb=document.querySelectorAll('.filter-btn'),cards=document.querySelectorAll('.work-card'),engineCards=document.querySelectorAll('.work-card[data-category="engine"]');engineCards.forEach(function(c){c._origTop=parseFloat(c.style.top);});fb.forEach(function(b){b.addEventListener('click',function(){fb.forEach(function(x){x.classList.remove('active');});b.classList.add('active');var f=b.dataset.filter;engineCards.forEach(function(c){c.style.top=c._origTop+'%';});if(f==='engine'){engineCards.forEach(function(c){c.style.top=(c._origTop-36.85)+'%';});}cards.forEach(function(c,i){c.style.transitionDelay='0s';c.style.opacity='0';c.style.transform='translateY(10px)';setTimeout(function(){var m;if(f==='video'){m=c.dataset.category==='video';}else{m=(f==='all'&&c.dataset.category!=='video')||c.dataset.category===f;}c.style.display=m?'block':'none';c.style.opacity=m?'1':'0';c.style.transform=m?'translateY(0)':'translateY(10px)';c.style.transitionDelay=m?String((i%8)*0.05)+'s':'0s';},200);});});});var track=document.getElementById('carouselTrack'),dc=document.getElementById('carouselDots'),pBar=document.getElementById('carouselProgress'),tSlides=track?track.querySelectorAll('.carousel-item').length:0;if(tSlides){var cur=0,at,pt;var iv=4000;for(var i=0;i<tSlides;i++){(function(idx){var d=document.createElement('button');d.className='dot'+(idx===0?' active':'');d.addEventListener('click',function(){goTo(idx);});dc.appendChild(d);})(i);}var dots=dc.querySelectorAll('.dot');function up(){track.style.transform='translateX(-'+cur*100+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===cur);});}function goTo(i){cur=i;up();resetAP();}function nx(){cur=(cur+1)%tSlides;up();}function pv(){cur=(cur-1+tSlides)%tSlides;up();}function sP(){var s=Date.now();pBar.style.transition='none';pBar.style.width='0%';clearInterval(pt);pt=setInterval(function(){var p=Math.min(((Date.now()-s)/iv)*100,100);pBar.style.width=p+'%';if(p>=100)clearInterval(pt);},30);}function resetAP(){clearTimeout(at);clearInterval(pt);sP();at=setTimeout(function(){nx();resetAP();},iv);}document.getElementById('carouselPrev').addEventListener('click',function(){pv();resetAP();});document.getElementById('carouselNext').addEventListener('click',function(){nx();resetAP();});document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'){pv();resetAP();}else if(e.key==='ArrowRight'){nx();resetAP();}});var cw=document.getElementById('featuredCarousel');var tsx=0;cw.addEventListener('touchstart',function(e){tsx=e.touches[0].clientX;});cw.addEventListener('touchend',function(e){var d=tsx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?nx():pv();resetAP();}});cw.addEventListener('mouseenter',function(){clearTimeout(at);clearInterval(pt);});cw.addEventListener('mouseleave',resetAP);cw.addEventListener('mousemove',function(e){var r=cw.getBoundingClientRect();var x=(e.clientX-r.left)/r.width-0.5;var imgs=track.querySelectorAll('.carousel-item img');if(imgs[cur])imgs[cur].style.transform='scale(1.04) translateX('+x*15+'px)';});cw.addEventListener('mouseleave',function(){var imgs=track.querySelectorAll('.carousel-item img');if(imgs[cur])imgs[cur].style.transform='scale(1)';});resetAP();}var modal=document.getElementById('modal'),mImg=document.getElementById('modalImage'),mVid=document.getElementById('modalVideo');document.getElementById('worksGrid').addEventListener('click',function(e){var card=e.target.closest('.work-card');if(!card)return;var src=card.dataset.src;if(/\.mp4$/i.test(src)){mImg.style.display='none';mVid.style.display='block';mVid.src=src;mVid.currentTime=0;mVid.play().catch(function(){});}else{mVid.style.display='none';mVid.pause();mVid.removeAttribute('src');mImg.style.display='block';mImg.src=src;}modal.classList.add('open');document.body.style.overflow='hidden';});document.getElementById('modalClose').addEventListener('click',function(){mVid.pause();mVid.removeAttribute('src');modal.classList.remove('open');document.body.style.overflow='';});modal.addEventListener('click',function(e){if(e.target===modal){mVid.pause();mVid.removeAttribute('src');modal.classList.remove('open');document.body.style.overflow='';}});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open')){mVid.pause();mVid.removeAttribute('src');modal.classList.remove('open');document.body.style.overflow='';}});}
+</script>
+<script>
+// Lazy-load videos only when '视频演示' filter is clicked
+(function(){
+  var videoCards = document.querySelectorAll('.work-card[data-category="video"]');
+  var loaded = false;
+  var filterBtns = document.querySelectorAll('.filter-btn');
+  for(var i=0;i<filterBtns.length;i++){
+    filterBtns[i].addEventListener('click',function(){
+      if(this.dataset.filter==='video' && !loaded){
+        loaded = true;
+        setTimeout(function(){
+          videoCards.forEach(function(card){
+            var src = card.dataset.src;
+            if(!src||!src.endsWith('.mp4')) return;
+            var v = document.createElement('video');
+            v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+            v.preload = 'none';
+            v.innerHTML = '<source src="'+src+'" type="video/mp4">';
+            v.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:0.3vw;';
+            card.insertBefore(v, card.firstChild);
+          });
+        },100);
+      }
+    });
+  }
+})();
 </script>
 </body>
 </html>
