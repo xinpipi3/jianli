@@ -574,11 +574,11 @@ BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), 
 
     // ── Mobile eye floater: touch-drag anywhere to move eyes ──
     var eyeFloater = document.getElementById('eyeFloater');
-    var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    var isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
     if(isTouch && eyeFloater){
       eyeFloater.style.display = 'block';
-      var eActive = false, eStartX = 0, eStartY = 0;
+      var eActive = false;
 
       function updateEye(fx, fy){
         // Map finger screen position to _eyeMX/_eyeMY (-1..1), clamped
@@ -760,50 +760,26 @@ BABYLON.SceneLoader.ImportMesh('', 'assets/models/', 'scene.fbx?t='+Date.now(), 
   var edgeR = document.getElementById('edgeRight');
   var edgeDead = 10 * Math.PI / 180;
   var edgeRange = 35 * Math.PI / 180;
-  var edgeMaxL = 0, edgeMaxR = 0;
-
-  // Measure image rendered width (height:100% + auto width → depends on viewport)
-  function measureEdge(img){
-    if(!img) return 600;
-    var prev = img.style.transform;
-    img.style.transform = 'translateX(0px)';
-    var w = img.getBoundingClientRect().width;
-    img.style.transform = prev;
-    return w || 600;
-  }
-  function initEdgeWidths(){
-    edgeMaxL = measureEdge(edgeL);
-    edgeMaxR = measureEdge(edgeR);
-  }
-
-  if(edgeL){ edgeL.onload = initEdgeWidths; if(edgeL.complete) initEdgeWidths(); }
-  if(edgeR){ edgeR.onload = initEdgeWidths; if(edgeR.complete) initEdgeWidths(); }
-  window.addEventListener('resize', initEdgeWidths);
-  // Fallback: try again after a delay in case images are slow
-  setTimeout(function(){ if(!edgeMaxL && !edgeMaxR) initEdgeWidths(); }, 1000);
 
   scene.registerBeforeRender(function(){
     if(!edgeL && !edgeR) return;
     var delta = window._defAlpha - camera.alpha;
     var absDelta = Math.abs(delta);
-    var slideFactor = (absDelta <= edgeDead) ? 0 : Math.min(1, (absDelta - edgeDead) / edgeRange);
+    var slide = (absDelta <= edgeDead) ? 0 : Math.min(1, (absDelta - edgeDead) / edgeRange);
 
-    if(edgeL && edgeMaxL){
-      var hiddenL = -edgeMaxL;
-      var shownL  = 0;  // left edge touches page left edge when fully shown
+    if(edgeL){
       if(delta < -edgeDead){
-        edgeL.style.transform = 'translateX(' + (hiddenL + (shownL - hiddenL) * slideFactor) + 'px)';
+        // overshoot slightly to compensate image internal padding
+        edgeL.style.transform = 'translateX(' + (-100 + slide * 115) + '%)';
       } else {
-        edgeL.style.transform = 'translateX(' + hiddenL + 'px)';
+        edgeL.style.transform = 'translateX(-100%)';
       }
     }
-    if(edgeR && edgeMaxR){
-      var hiddenR = edgeMaxR;
-      var shownR  = 0;  // right edge touches page right edge when fully shown
+    if(edgeR){
       if(delta > edgeDead){
-        edgeR.style.transform = 'translateX(' + (hiddenR + (shownR - hiddenR) * slideFactor) + 'px)';
+        edgeR.style.transform = 'translateX(' + (100 - slide * 115) + '%)';
       } else {
-        edgeR.style.transform = 'translateX(' + hiddenR + 'px)';
+        edgeR.style.transform = 'translateX(100%)';
       }
     }
   });
